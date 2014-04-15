@@ -3,6 +3,7 @@
 
 from operator import mul
 from itertools import tee, izip, imap
+from math import log10
 
 def pairwise(iterable):
   "s -> (s0,s1), (s1,s2), (s2, s3), ..."
@@ -18,6 +19,8 @@ class SudoCube:
     self.dimensions = map(int, dimensions)
     self.edgeSize = reduce(mul, self.dimensions)
     self.unitSizes = map(lambda x: self.edgeSize ** x, range(len(self.dimensions) + 1))
+    
+    self.symbolSize = int(log10(self.edgeSize) + 1)
 
     self.table = [0] * self.unitSizes[-1]
 
@@ -39,7 +42,7 @@ class SudoCube:
     index = line * self.unitSizes[1]
     for i in range(self.edgeSize / self.dimensions[0]):
       for j in range(self.dimensions[0]): 
-        print self.table[index + i * self.dimensions[0] + j], ' ',
+        print str(self.table[index + i * self.dimensions[0] + j]).rjust(self.symbolSize), ' ',
       print ' ',
     print ''
 
@@ -48,15 +51,13 @@ class SudoCube:
     for i in range(self.edgeSize):
       if 0 == i % self.dimensions[1]: print ''
       self.printLine(lineIdx + i)
-      
-  def printMe(self):
+
+  def printCube(self):
     if 2 == len(self.dimensions):
       self.printLayer(0)
-    
+
 
 if __name__ == "__main__":
-  cube = SudoCube((3, 2))
-  print cube[(1, 1)]
-  cube[(1, 1)] = 10
-  print cube[(1, 1)]
-  cube.printMe()
+  cube = SudoCube((4, 3))
+  print cube.symbolSize
+  cube.printCube()
