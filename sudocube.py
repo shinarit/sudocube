@@ -35,8 +35,28 @@ class SudoCube:
     "expect key to be an iterable of coordinates"
     self.table[self.coordinateToInner(*key)] = value
 
+  def printLine(self, line):
+    index = line * self.unitSizes[1]
+    for i in range(self.edgeSize / self.dimensions[0]):
+      for j in range(self.dimensions[0]): 
+        print self.table[index + i * self.dimensions[0] + j], ' ',
+      print ' ',
+    print ''
+
+  def printLayer(self, layer):
+    lineIdx = layer * self.edgeSize
+    for i in range(self.edgeSize):
+      if 0 == i % self.dimensions[1]: print ''
+      self.printLine(lineIdx + i)
+      
+  def printMe(self):
+    if 2 == len(self.dimensions):
+      self.printLayer(0)
+    
+
 if __name__ == "__main__":
   cube = SudoCube((3, 2))
   print cube[(1, 1)]
   cube[(1, 1)] = 10
   print cube[(1, 1)]
+  cube.printMe()
