@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from operator import mul
-from itertools import tee, izip
+from itertools import tee, izip, imap
 
 
 def pairwise(iterable):
@@ -23,16 +23,10 @@ class SudoCube:
     self.table = [0] * self.unitSizes[-1]
 
   def coordinateToInner(self, *coords):
-    inner = 0
-    for coord, size in izip(coords, self.unitSizes):
-      inner += coord * size
-    return inner
+    return sum(imap(mul, coords, self.unitSizes))
   
   def innerToCoordinate(self, inner):
-    coords = []
-    for divider, modulus in pairwise(self.unitSizes):
-      coords.append(inner % modulus / divider)
-    return coords
+    return map(lambda (div, mod): inner % mod / div, pairwise(self.unitSizes))
 
 
 if __name__ == "__main__":
