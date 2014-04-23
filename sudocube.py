@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import pdb
+
 from operator import mul
-from itertools import tee, izip, imap
+from itertools import tee, izip, imap, repeat
 from math import log10
 
 def pairwise(iterable):
@@ -89,10 +91,28 @@ class SudoCube:
         self.table[index] = 0
         curr -= 1
 
+  def generate(self, idx):
+    gen = []
+    coords = [0] * self.numOfDimensions
+    for i in repeat(None, self.edgeSize):
+      gen.append(idx)
+      for j in xrange(len(coords)):
+        coords[j] += 1
+        idx += self.unitSizes[j]
+        coord, mod = coords[j], self.dimensions[j]
+        if coord == mod:
+          coords[j] = 0
+          idx -= mod * self.unitSizes[j]
+        else:
+          break
+    return gen
+
 
 if __name__ == "__main__":
-  cube = SudoCube((2, 3))
+  cube = SudoCube((3, 3, 3))
   print cube.symbolSize
   cube.printCube()
-  cube.solve()
-  cube.printCube()
+  #cube.solve()
+  #cube.printCube()
+  print map(cube.innerToCoordinate, cube.generate(0))
+  print cube.generate(0)
