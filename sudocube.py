@@ -91,6 +91,14 @@ class SudoCube:
         self.table[index] = 0
         curr -= 1
 
+  def getBoxBase(self, idx):
+    for i in xrange(len(self.dimensions)):
+      delta = idx % self.unitSizes[i]
+      idx -= delta
+      idx -= idx % (self.dimensions[i] * self.unitSizes[i])
+      idx += delta
+    return idx
+
   def generate(self, idx):
     gen = []
     coords = [0] * self.numOfDimensions
@@ -116,3 +124,7 @@ if __name__ == "__main__":
   #cube.printCube()
   print map(cube.innerToCoordinate, cube.generate(0))
   print cube.generate(0)
+  print 0, cube.getBoxBase(0)
+  print 2, cube.getBoxBase(2)
+  print 3, cube.getBoxBase(3)
+  print 109, cube.getBoxBase(109)
