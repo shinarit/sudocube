@@ -27,6 +27,12 @@ class SudoCube:
     
     self.table = [0] * self.unitSizes[-1]
 
+    self.boxes = {}
+    for idx in xrange(len(self.table)):
+      corner = self.getBoxBase(idx)
+      if not corner in self.boxes:
+        self.boxes[corner] = self.generate(corner)
+    
     self.unitSeparator = ' | '
     self.unitSeparatorSpec = ' || '
 
@@ -75,18 +81,24 @@ class SudoCube:
     if 2 == len(self.dimensions):
       self.printLayer(0)
 
+  def checkLine(self, line):
+    checker = [0] * (self.edgeSize)
+    for value in line:
+      if value > 0:
+        checker[value - 1] += 1
+        if checker[value - 1] > 1:
+          return False
+    return True
+
   def validatePosition(self, index):
     "startpointokból indulunk self.dimension[i]-nyi stepekkel haladva"
     coords = self.innerToCoordinate(index)
     startPoints = [self.coordinateToInner(*(coords[:i] + [0] + coords[i + 1:])) for i in xrange(self.numOfDimensions)]
     for start, step in izip(startPoints, self.unitSizes):
-      checker = [0] * (self.edgeSize)
-      for value in self.table[start : start + self.edgeSize * step : step]:
-        if value > 0:
-          checker[value - 1] += 1
-          if checker[value - 1] > 1:
-            return False
-    return True
+      if not self.checkLine(self.table[start : start + self.edgeSize * step : step]):
+        return False
+
+    return self.checkLine([self.table[i] for i in self.boxes[self.getBoxBase(index)]])
 
   def increaseOnPosition(self, index):
     self.table[index] += 1
