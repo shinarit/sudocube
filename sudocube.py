@@ -36,9 +36,12 @@ class SudoCube:
     self.unitSeparator = ' | '
     self.unitSeparatorSpec = ' || '
 
-    lineSize = self.edgeSize * self.symbolSize + (self.edgeSize / self.dimensions[0] - 1) * len(self.unitSeparatorSpec) + (self.dimensions[0] - 1) * self.edgeSize / self.dimensions[0] * len(self.unitSeparator) #the padding
-    self.lineSep = '\n' + '-' * (lineSize) + '\n'
-    self.lineSepSpec = '\n' + '=' * (lineSize) + '\n'
+    lineLength = self.edgeSize * self.symbolSize + (self.edgeSize / self.dimensions[0] - 1) * len(self.unitSeparatorSpec) + (self.dimensions[0] - 1) * self.edgeSize / self.dimensions[0] * len(self.unitSeparator) #the padding
+    self.lineSep = '\n' + '-' * lineLength + '\n'
+    self.lineSepSpec = '\n' + '=' * lineLength + '\n'
+    
+    self.layerSep = '\n\n' + 'X' * lineLength + '\n\n'
+    self.layerSepSpec = '\n\n' + '()' * ((lineLength + 1) / 2) + '\n\n'
 
   def coordinateToInner(self, *coords):
     return sum(imap(mul, coords, self.unitSizes))
@@ -53,15 +56,19 @@ class SudoCube:
   def __setitem__(self, key, value):
     "expect key to be an iterable of coordinates"
     self.table[self.coordinateToInner(*key)] = value
-
+  
   def lineRepr(self, line):
     index = line * self.unitSizes[1]
     return self.unitSeparatorSpec.join([self.unitSeparator.join([str(x).rjust(self.symbolSize) for x in self.table[idx : idx + self.dimensions[0]]]) for idx in xrange(index, index + self.edgeSize, self.dimensions[0])])
 
   def layerRepr(self, layer):
-    lineIdx = layer * self.unitSizes[1]
-    return self.lineSepSpec.join([self.lineSep.join([self.lineRepr(i) for i in xrange(idx, idx + self.dimensions[1])]) for idx in xrange(0, self.edgeSize, self.dimensions[1])])
-    
+    index = layer * self.unitSizes[1]
+    return self.lineSepSpec.join([self.lineSep.join([self.lineRepr(i) for i in xrange(idx, idx + self.dimensions[1])]) for idx in xrange(index, index + self.edgeSize, self.dimensions[1])])
+
+  def cubeRepr(self, cube):
+    index = cube * self.unitSizes[2]
+    return self.layerSepSpec.join([self.layerSep.join([self.layerRepr(i) for i in xrange(idx, idx + self.dimensions[2])]) for idx in xrange(index, index + self.edgeSize, self.dimensions[2])])
+
 
   def printLine(self, line):
     index = line * self.unitSizes[1]
@@ -145,9 +152,10 @@ class SudoCube:
 
 
 if __name__ == "__main__":
-  cube = SudoCube((3, 3))
+  cube = SudoCube((2, 1, 1))
   print cube.symbolSize
   cube.printCube()
   cube.solve()
   cube.printCube()
-  print cube.layerRepr(0)
+  #print cube.layerRepr(0)
+  print cube.cubeRepr(0)
