@@ -24,8 +24,15 @@ class SudoCube:
     self.unitSizes = map(lambda x: self.edgeSize ** x, range(len(self.dimensions) + 1))
     
     self.symbolSize = int(log10(self.edgeSize) + 1)
-
+    
     self.table = [0] * self.unitSizes[-1]
+
+    self.unitSeparator = ' | '
+    self.unitSeparatorSpec = ' || '
+
+    lineSize = self.edgeSize * self.symbolSize + (self.edgeSize / self.dimensions[0] - 1) * len(self.unitSeparatorSpec) + (self.dimensions[0] - 1) * self.edgeSize / self.dimensions[0] * len(self.unitSeparator) #the padding
+    self.lineSep = '\n' + '-' * (lineSize) + '\n'
+    self.lineSepSpec = '\n' + '=' * (lineSize) + '\n'
 
   def coordinateToInner(self, *coords):
     return sum(imap(mul, coords, self.unitSizes))
@@ -41,6 +48,15 @@ class SudoCube:
     "expect key to be an iterable of coordinates"
     self.table[self.coordinateToInner(*key)] = value
 
+  def lineRepr(self, line):
+    index = line * self.unitSizes[1]
+    return self.unitSeparatorSpec.join([self.unitSeparator.join([str(x).rjust(self.symbolSize) for x in self.table[idx : idx + self.dimensions[0]]]) for idx in xrange(index, index + self.edgeSize, self.dimensions[0])])
+
+  def layerRepr(self, layer):
+    lineIdx = layer * self.unitSizes[1]
+    return self.lineSepSpec.join([self.lineSep.join([self.lineRepr(i) for i in xrange(idx, idx + self.dimensions[1])]) for idx in xrange(0, self.edgeSize, self.dimensions[1])])
+    
+
   def printLine(self, line):
     index = line * self.unitSizes[1]
     for i in range(self.edgeSize / self.dimensions[0]):
@@ -50,7 +66,7 @@ class SudoCube:
     print ''
 
   def printLayer(self, layer):
-    lineIdx = layer * self.edgeSize
+    lineIdx = layer * self.unitSizes[2]
     for i in range(self.edgeSize):
       if 0 == i % self.dimensions[1]: print ''
       self.printLine(lineIdx + i)
@@ -117,14 +133,9 @@ class SudoCube:
 
 
 if __name__ == "__main__":
-  cube = SudoCube((3, 3, 3))
+  cube = SudoCube((3, 3))
   print cube.symbolSize
   cube.printCube()
-  #cube.solve()
-  #cube.printCube()
-  print map(cube.innerToCoordinate, cube.generate(0))
-  print cube.generate(0)
-  print 0, cube.getBoxBase(0)
-  print 2, cube.getBoxBase(2)
-  print 3, cube.getBoxBase(3)
-  print 109, cube.getBoxBase(109)
+  cube.solve()
+  cube.printCube()
+  print cube.layerRepr(0)
