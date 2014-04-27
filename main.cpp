@@ -15,6 +15,8 @@ int main()
   std::cout << "x: " << x << '\n';
   for(int i(0); i<9; ++i)
     cube[i][0] = i;
+  for(int i(0); i<9; ++i)
+    cube[3][i] = 8 - i;
   cube.print(std::cout);
   std::cout << '\n';
 }

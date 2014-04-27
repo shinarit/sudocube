@@ -5,6 +5,8 @@
 #include <functional>
 #include <cmath>
 #include <numeric>
+#include <string>
+#include <array>
 
 // temporary!!!
 #include <ostream>
@@ -21,6 +23,7 @@ public:
   : mDimensions(begin(dimensions), end(dimensions))
   , mEdgeSize(std::accumulate(begin(dimensions), end(dimensions), 1, std::multiplies<int>()))
   , mTable(std::pow(mEdgeSize, mDimensions.size()))
+  , mSymbolWidth(std::log10(mEdgeSize) + 1)
   {
     int unit(1);
     for(int i(0); i <= mDimensions.size(); ++i)
@@ -28,6 +31,13 @@ public:
       mUnitSizes.push_back(unit);
       unit *= mEdgeSize;
     }
+    
+    mSeparators.push_back({"|", "||"});
+
+    int lineLength = mEdgeSize * mSymbolWidth +
+                     (mEdgeSize / mDimensions[0] - 1) * mSeparators[0][1].size() +
+                     (mDimensions[0] - 1) * mEdgeSize / mDimensions[0] * mSeparators[0][0].size();
+    mSeparators.push_back({"\n" + std::string(lineLength, '-') + "\n", "\n" + std::string(lineLength, '=') + "\n"});
   }
   
 private:
@@ -65,17 +75,18 @@ public:
     return Indexer(*this, {}, index);
   }
 
-  void print(std::ostream& out)
-  {
-    std::copy(begin(mTable), end(mTable), std::ostream_iterator<int>(out));
-  }
-
+  void print(std::ostream& out);
+  
 private:
+  std::vector<std::array<std::string, 2>> mSeparators;
   typedef std::vector<UnitType> ValueList;
+
+  void printRecursively(std::ostream& out, int level, int unitIndex);
 
   ValueList     mDimensions;
   int           mEdgeSize;
   ValueList     mTable;
   
   ValueList     mUnitSizes;
+  int           mSymbolWidth;
 };
