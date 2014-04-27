@@ -57,9 +57,15 @@ class SudoCube:
     "expect key to be an iterable of coordinates"
     self.table[self.coordinateToInner(*key)] = value
   
+  def unitRepr(self, index):
+    val = self.table[index]
+    if val > 0:
+      return str(val).rjust(self.symbolSize)
+    return ' ' * self.symbolSize
+  
   def lineRepr(self, line):
     index = line * self.unitSizes[1]
-    return self.unitSeparatorSpec.join([self.unitSeparator.join([str(x).rjust(self.symbolSize) for x in self.table[idx : idx + self.dimensions[0]]]) for idx in xrange(index, index + self.edgeSize, self.dimensions[0])])
+    return self.unitSeparatorSpec.join([self.unitSeparator.join([self.unitRepr(i) for i in xrange(idx, idx + self.dimensions[0])]) for idx in xrange(index, index + self.edgeSize, self.dimensions[0])])
 
   def layerRepr(self, layer):
     index = layer * self.unitSizes[1]
