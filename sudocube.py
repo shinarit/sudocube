@@ -33,15 +33,20 @@ class SudoCube:
       if not corner in self.boxes:
         self.boxes[corner] = self.generate(corner)
     
-    self.unitSeparator = ' | '
-    self.unitSeparatorSpec = ' || '
+    unitSeparator = ' | '
+    unitSeparatorSpec = ' || '
 
-    lineLength = self.edgeSize * self.symbolSize + (self.edgeSize / self.dimensions[0] - 1) * len(self.unitSeparatorSpec) + (self.dimensions[0] - 1) * self.edgeSize / self.dimensions[0] * len(self.unitSeparator) #the padding
-    self.lineSep = '\n' + '-' * lineLength + '\n'
-    self.lineSepSpec = '\n' + '=' * lineLength + '\n'
+    lineLength = self.edgeSize * self.symbolSize + (self.edgeSize / self.dimensions[0] - 1) * len(unitSeparatorSpec) + (self.dimensions[0] - 1) * self.edgeSize / self.dimensions[0] * len(unitSeparator) #the padding
     
-    self.layerSep = '\n\n' + 'X' * lineLength + '\n\n'
-    self.layerSepSpec = '\n\n' + '()' * ((lineLength + 1) / 2) + '\n\n'
+    lineSeparator = '\n' + '-' * lineLength + '\n'
+    lineSeparatorSpec = '\n' + '=' * lineLength + '\n'
+    
+    layerSeparator = '\n\n' + 'X' * lineLength + '\n\n'
+    layerSeparatorSpec = '\n\n' + '()' * ((lineLength + 1) / 2) + '\n\n'
+    
+    self.separators =[(unitSeparator, unitSeparatorSpec),
+                      (lineSeparator, lineSeparatorSpec),
+                      (layerSeparator, layerSeparatorSpec)]
 
   def coordinateToInner(self, *coords):
     return sum(imap(mul, coords, self.unitSizes))
@@ -57,42 +62,22 @@ class SudoCube:
     "expect key to be an iterable of coordinates"
     self.table[self.coordinateToInner(*key)] = value
   
-  def unitRepr(self, index):
-    val = self.table[index]
-    if val > 0:
-      return str(val).rjust(self.symbolSize)
-    return ' ' * self.symbolSize
-  
-  def lineRepr(self, line):
-    index = line * self.unitSizes[1]
-    return self.unitSeparatorSpec.join([self.unitSeparator.join([self.unitRepr(i) for i in xrange(idx, idx + self.dimensions[0])]) for idx in xrange(index, index + self.edgeSize, self.dimensions[0])])
+  def __repr__(self):
+    return str((self.dimensions.__repr__(), self.table.__repr__()))
+    
+  def __str__(self):
+    return self.strRecursive(len(self.dimensions), 0)
 
-  def layerRepr(self, layer):
-    index = layer * self.unitSizes[1]
-    return self.lineSepSpec.join([self.lineSep.join([self.lineRepr(i) for i in xrange(idx, idx + self.dimensions[1])]) for idx in xrange(index, index + self.edgeSize, self.dimensions[1])])
-
-  def cubeRepr(self, cube):
-    index = cube * self.unitSizes[2]
-    return self.layerSepSpec.join([self.layerSep.join([self.layerRepr(i) for i in xrange(idx, idx + self.dimensions[2])]) for idx in xrange(index, index + self.edgeSize, self.dimensions[2])])
-
-
-  def printLine(self, line):
-    index = line * self.unitSizes[1]
-    for i in range(self.edgeSize / self.dimensions[0]):
-      for j in range(self.dimensions[0]): 
-        print str(self.table[index + i * self.dimensions[0] + j]).rjust(self.symbolSize), ' ',
-      print ' ',
-    print ''
-
-  def printLayer(self, layer):
-    lineIdx = layer * self.unitSizes[2]
-    for i in range(self.edgeSize):
-      if 0 == i % self.dimensions[1]: print ''
-      self.printLine(lineIdx + i)
-
-  def printCube(self):
-    if 2 == len(self.dimensions):
-      self.printLayer(0)
+  def strRecursive(self, level, unitIndex):
+    if 0 == level:
+      val = self.table[unitIndex]
+      if val > 0:
+        return str(val).rjust(self.symbolSize)
+      return ' ' * self.symbolSize
+    else:
+      index = unitIndex * self.unitSizes[level]
+      subIndex = unitIndex * self.edgeSize
+      return self.separators[level - 1][1].join([self.separators[level - 1][0].join([self.strRecursive(level - 1, idx + i) for i in xrange(self.dimensions[level - 1])]) for idx in xrange(subIndex, subIndex + self.edgeSize, self.dimensions[level - 1])])
 
   def checkLine(self, line):
     checker = [0] * (self.edgeSize)
@@ -158,10 +143,10 @@ class SudoCube:
 
 
 if __name__ == "__main__":
-  cube = SudoCube((2, 1, 1))
+  cube = SudoCube((4, 1, 1))
   print cube.symbolSize
-  cube.printCube()
+  print cube
   cube.solve()
-  cube.printCube()
-  #print cube.layerRepr(0)
-  print cube.cubeRepr(0)
+  print cube
+  
+  print cube.__repr__()
