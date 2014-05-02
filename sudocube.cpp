@@ -2,7 +2,7 @@
 
 #include <ostream>
 
-void SudoCube::print(std::ostream& out)
+void SudoCube::print(std::ostream& out) const
 {
   printRecursively(out, mDimensions.size(), 0);
 }
@@ -44,7 +44,7 @@ bool SudoCube::increaseOnPosition(int index)
   return mTable[index] <= mEdgeSize;
 }
 
-bool SudoCube::positionValid(int index)
+bool SudoCube::positionValid(int index) const
 {
   //check the lines
   for (int i(0); i < mDimensions.size(); ++i)
@@ -60,7 +60,7 @@ bool SudoCube::positionValid(int index)
   return true;
 }
 
-bool SudoCube::checkLine(UnitType* array, int step)
+bool SudoCube::checkLine(const UnitType* array, int step) const
 {
   static IntList checker;
   checker.assign(mEdgeSize, 0);
@@ -79,7 +79,7 @@ bool SudoCube::checkLine(UnitType* array, int step)
   return true;
 }
 
-void SudoCube::printRecursively(std::ostream& out, int level, int unitIndex)
+void SudoCube::printRecursively(std::ostream& out, int level, int unitIndex) const
 {
   if (0 == level)
   {

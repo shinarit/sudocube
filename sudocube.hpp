@@ -40,7 +40,7 @@ public:
     mSeparators.push_back({"\n\n" + std::string(lineLength, '=') + "\n\n", "\n\n" + std::string(lineLength, '|') + "\n\n"});
   }
 
-  void print(std::ostream& out);
+  void print(std::ostream& out) const;
   
   bool solve();
   
@@ -80,14 +80,20 @@ public:
   }
 
 private:
-  std::vector<std::array<std::string, 2>> mSeparators;
   typedef std::vector<UnitType> ValueList;
   typedef std::vector<int> IntList;
+  typedef std::string Separator;
+  typedef std::array<Separator, 2> SeparatorPair;
+  typedef std::vector<SeparatorPair> SeparatorList;
 
   bool increaseOnPosition(int index);
-  bool positionValid(int index);
-  bool checkLine(UnitType* array, int step);
-  void printRecursively(std::ostream& out, int level, int unitIndex);
+  bool positionValid(int index) const;
+  bool checkLine(const UnitType* array, int step) const;
+  
+  void printRecursively(std::ostream& out, int level, int unitIndex) const;
+  
+  IntList generateBox() const;
+  int getBoxCorner() const;
 
   IntList       mDimensions;
   int           mEdgeSize;
@@ -95,4 +101,6 @@ private:
   
   IntList       mUnitSizes;
   int           mSymbolWidth;
+  
+  SeparatorList mSeparators;
 };
