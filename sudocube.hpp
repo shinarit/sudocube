@@ -8,10 +8,7 @@
 #include <string>
 #include <array>
 
-// temporary!!!
-#include <ostream>
-#include <iterator>
-///temporary!!!
+#include <iosfwd>
 
 class SudoCube
 {
@@ -37,8 +34,15 @@ public:
     int lineLength = mEdgeSize * mSymbolWidth +
                      (mEdgeSize / mDimensions[0] - 1) * mSeparators[0][1].size() +
                      (mDimensions[0] - 1) * mEdgeSize / mDimensions[0] * mSeparators[0][0].size();
+    //2d
     mSeparators.push_back({"\n" + std::string(lineLength, '-') + "\n", "\n" + std::string(lineLength, '=') + "\n"});
+    //3d
+    mSeparators.push_back({"\n\n" + std::string(lineLength, '=') + "\n\n", "\n\n" + std::string(lineLength, '|') + "\n\n"});
   }
+
+  void print(std::ostream& out);
+  
+  bool solve();
   
 private:
   struct Indexer
@@ -75,18 +79,20 @@ public:
     return Indexer(*this, {}, index);
   }
 
-  void print(std::ostream& out);
-  
 private:
   std::vector<std::array<std::string, 2>> mSeparators;
   typedef std::vector<UnitType> ValueList;
+  typedef std::vector<int> IntList;
 
+  bool increaseOnPosition(int index);
+  bool positionValid(int index);
+  bool checkLine(UnitType* array, int step);
   void printRecursively(std::ostream& out, int level, int unitIndex);
 
-  ValueList     mDimensions;
+  IntList       mDimensions;
   int           mEdgeSize;
   ValueList     mTable;
   
-  ValueList     mUnitSizes;
+  IntList       mUnitSizes;
   int           mSymbolWidth;
 };
