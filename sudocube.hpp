@@ -7,7 +7,7 @@
 #include <numeric>
 #include <string>
 #include <array>
-
+#include <map>
 #include <iosfwd>
 
 class SudoCube
@@ -21,6 +21,7 @@ public:
   , mEdgeSize(std::accumulate(begin(dimensions), end(dimensions), 1, std::multiplies<int>()))
   , mTable(std::pow(mEdgeSize, mDimensions.size()))
   , mSymbolWidth(std::log10(mEdgeSize) + 1)
+  , mBoxJump(mTable.size(), 0)
   {
     int unit(1);
     for(int i(0); i <= mDimensions.size(); ++i)
@@ -30,7 +31,6 @@ public:
     }
     
     mSeparators.push_back({"|", "||"});
-
     int lineLength = mEdgeSize * mSymbolWidth +
                      (mEdgeSize / mDimensions[0] - 1) * mSeparators[0][1].size() +
                      (mDimensions[0] - 1) * mEdgeSize / mDimensions[0] * mSeparators[0][0].size();
@@ -38,6 +38,21 @@ public:
     mSeparators.push_back({"\n" + std::string(lineLength, '-') + "\n", "\n" + std::string(lineLength, '=') + "\n"});
     //3d
     mSeparators.push_back({"\n\n" + std::string(lineLength, '=') + "\n\n", "\n\n" + std::string(lineLength, '|') + "\n\n"});
+    
+    //generate box checkers
+    IntList boxTemplate(generateBox());
+    for (int i(0); i < mTable.size(); ++i)
+    {
+      int corner(getBoxCorner(i));
+      auto it(mBoxes.find(corner));
+      if (it == mBoxes.end())
+      {
+        IntList box(mEdgeSize);
+        std::transform(begin(boxTemplate), end(boxTemplate), std::back_insert_iterator<IntList>(box), [corner](int index){ return index + corner; });
+        mBoxes.insert({corner, box});
+      }
+      mBoxJump[i] = &mBoxes[corner];
+    }
   }
 
   void print(std::ostream& out) const;
@@ -85,15 +100,17 @@ private:
   typedef std::string Separator;
   typedef std::array<Separator, 2> SeparatorPair;
   typedef std::vector<SeparatorPair> SeparatorList;
+  typedef std::map<int, IntList> Boxes;
+  typedef std::vector<IntList*> BoxJumplist;
 
   bool increaseOnPosition(int index);
   bool positionValid(int index) const;
   bool checkLine(const UnitType* array, int step) const;
   
   void printRecursively(std::ostream& out, int level, int unitIndex) const;
-  
+
   IntList generateBox() const;
-  int getBoxCorner() const;
+  int getBoxCorner(int index) const;
 
   IntList       mDimensions;
   int           mEdgeSize;
@@ -103,4 +120,7 @@ private:
   int           mSymbolWidth;
   
   SeparatorList mSeparators;
+
+  Boxes         mBoxes;
+  BoxJumplist   mBoxJump;
 };

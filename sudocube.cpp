@@ -112,3 +112,47 @@ void SudoCube::printRecursively(std::ostream& out, int level, int unitIndex) con
   }
 }
 
+SudoCube::IntList SudoCube::generateBox() const
+{
+  IntList result;
+  IntList coords(mDimensions.size(), 0);
+  int index(0);
+  for (int i(0); i < mEdgeSize; ++i)
+  {
+    result.push_back(index);
+    for (int j(0); j < coords.size(); ++j)
+    {
+      int& coord(coords[j]);
+      int mod(mDimensions[j]);
+
+      ++coord;
+      index += mUnitSizes[j];
+      
+      if (coord == mod)
+      {
+        coord = 0;
+        index -= mod * mUnitSizes[j];
+      }
+      else
+      {
+        break;
+      }
+    }
+  }
+
+  return result;
+}
+
+int SudoCube::getBoxCorner(int index) const
+{
+  for (int i(0); i < mDimensions.size(); ++i)
+  {
+    int delta(index % mUnitSizes[i]);
+
+    index -= delta;
+    index -= index % (mDimensions[i] * mUnitSizes[i]);
+    index += delta;
+  }
+  return index;
+}
+
