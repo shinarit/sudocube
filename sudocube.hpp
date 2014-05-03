@@ -48,7 +48,7 @@ public:
       if (it == mBoxes.end())
       {
         IntList box(mEdgeSize);
-        std::transform(begin(boxTemplate), end(boxTemplate), std::back_insert_iterator<IntList>(box), [corner](int index){ return index + corner; });
+        std::transform(begin(boxTemplate), end(boxTemplate), begin(box), [corner](int index){ return index + corner; });
         mBoxes.insert({corner, box});
       }
       mBoxJump[i] = &mBoxes[corner];
@@ -105,7 +105,25 @@ private:
 
   bool increaseOnPosition(int index);
   bool positionValid(int index) const;
-  bool checkLine(const UnitType* array, int step) const;
+  template <class Iter>
+  bool checkLine(Iter iter) const
+  {
+    static IntList checker;
+    checker.assign(mEdgeSize, 0);
+
+    for (int i(0); i < mEdgeSize; ++i)
+    {
+      UnitType item(iter.next());
+      if (item > 0)
+      {
+        if (1 != ++checker[item - 1])
+        {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
   
   void printRecursively(std::ostream& out, int level, int unitIndex) const;
 

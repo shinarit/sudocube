@@ -44,39 +44,57 @@ bool SudoCube::increaseOnPosition(int index)
   return mTable[index] <= mEdgeSize;
 }
 
+template <class T>
+struct ArrayJumper
+{
+  //basically postfix++
+  T next()
+  {
+    T tmp(*array);
+    array += step;
+    return tmp;
+  }
+
+  const T* array;
+  int step;
+};
+
+template <class IndexList, class UnitList>
+struct IndirectionDirecter
+{
+  IndirectionDirecter(const IndexList& indices, const UnitList& elements): indices(indices), elements(elements), curr(0)
+  {}
+  typedef typename UnitList::value_type T;
+  //basically postfix++
+  T next()
+  {
+    return elements[indices[curr++]];
+  }
+
+  const IndexList& indices;
+  const UnitList& elements;
+  int curr;
+};
+
+template <class IndexList, class UnitList>
+IndirectionDirecter<IndexList, UnitList> createIndirectionDirecter(const IndexList& indices, const UnitList& elements)
+{
+  return {indices, elements};
+}
+
 bool SudoCube::positionValid(int index) const
 {
   //check the lines
   for (int i(0); i < mDimensions.size(); ++i)
   {
-    if (!checkLine(&mTable[index + index % mUnitSizes[i] - index % mUnitSizes[i + 1]], mUnitSizes[i]))
+    if (!checkLine(ArrayJumper<UnitType>{&mTable[index + index % mUnitSizes[i] - index % mUnitSizes[i + 1]], mUnitSizes[i]}))
     {
       return false;
     }
   }
   
   //check the box
-  
-  return true;
-}
-
-bool SudoCube::checkLine(const UnitType* array, int step) const
-{
-  static IntList checker;
-  checker.assign(mEdgeSize, 0);
-  
-  for (int i(0); i < mEdgeSize; ++i)
-  {
-    if (*array > 0)
-    {
-      if (1 != ++checker[(*array) - 1])
-      {
-        return false;
-      }
-    }
-    array += step;
-  }
-  return true;
+  return checkLine(createIndirectionDirecter(*mBoxJump[index], mTable));
 }
 
 void SudoCube::printRecursively(std::ostream& out, int level, int unitIndex) const
